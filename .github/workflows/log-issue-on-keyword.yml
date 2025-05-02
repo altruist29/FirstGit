@@ -1,0 +1,36 @@
+name: Log Issue on Keyword in Commit
+
+on:
+  push:
+    branches:
+      - main  # You can change this to any branch you want to monitor
+
+jobs:
+  check-commit-keyword:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check for keyword in commit message
+        run: |
+          echo "${{ github.event.head_commit.message }}" > commit_msg.txt
+          if grep -q "#BUG" commit_msg.txt; then
+            echo "Keyword #BUG found in commit message."
+          else
+            echo "No keyword found."
+            exit 1
+          fi
+
+      - name: Create GitHub Issue
+        if: success()  # Only runs if previous step succeeds
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: "BUG Keyword Detected in Commit",
+              body: `Commit message: "${{ github.event.head_commit.message }}"\n\n[View Commit](${{ github.event.head_commit.url }})`,
+              labels: ["auto-issue", "bug"]
+            })
+ 
