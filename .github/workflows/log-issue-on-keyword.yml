@@ -5,6 +5,9 @@ on:
     branches:
       - main  # You can change this to any branch you want to monitor
 
+permissions:
+  issues: write  # Ensure the GitHub token has permission to create issues
+
 jobs:
   check-commit-keyword:
     runs-on: ubuntu-latest
